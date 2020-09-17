@@ -125,20 +125,23 @@ def plot_over_quota(df: pandas.DataFrame, ax: matplotlib.axes.Axes) -> None:
 
 argument_parser = argparse.ArgumentParser(description = description)
 argument_parser.add_argument(
-    'file', metavar = 'FILE', nargs = 1, help = "csv file to analyze"
+    'infile', metavar = 'INFILE', nargs = 1, help = "csv file to analyze"
+)
+argument_parser.add_argument(
+    'outfile', metavar = 'OUTFILE', nargs = 1, help = "output pdf filename"
 )
 args: argparse.Namespace = argument_parser.parse_args()
 
 
 # read file into a pandas DataFrame
-with open(args.file[0], mode = "r", encoding = "utf-8") as file:
+with open(args.infile[0], mode = "r", encoding = "utf-8") as file:
     df: pandas.DataFrame = pandas.read_csv(file)
 
 
 # use pdf backend
 matplotlib.use("pdf", force = True)
 
-with matplotlib.backends.backend_pdf.PdfPages("test.pdf") as pdf:
+with matplotlib.backends.backend_pdf.PdfPages(args.outfile[0]) as pdf:
     # first page
     fig, ax = pyplot.subplots()
     plot_avg_time(df, ax)
