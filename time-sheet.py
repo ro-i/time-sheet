@@ -27,7 +27,7 @@ working_quota: List[Tuple[float, float, float]] = [
         # end
         datetime.datetime.fromisoformat("2021-01-31").timestamp(),
         # total quota
-        10.5# * 12
+        10.5 * 12
     ),
     (
         # begin
@@ -59,6 +59,13 @@ def get_working_quota_tuple_from_timestamp(ts: str) -> Tuple[float, float, float
 def get_working_quota_from_timestamp(ts: str) -> float:
     tuple = get_working_quota_tuple_from_timestamp(ts)
     return tuple[2] if tuple is not None else 0
+
+
+def get_working_quota_from_series(s: pandas.Series) -> float:
+    return s.apply(get_working_quota_tuple_from_timestamp) \
+            .drop_duplicates() \
+            .apply(lambda y: y[2] if y is not None else 0) \
+            .sum()
 
 
 def get_week_id_from_timestamp(ts: str) -> int:
@@ -95,7 +102,7 @@ def plot_avg_time(df: pandas.DataFrame, ax: matplotlib.axes.Axes) -> None:
     ax.set_ylabel("Durchschnittliche Arbeitszeit pro Tutor")
 
 
-def plot_over_quota(df: pandas.DataFrame, ax: matplotlib.axes.Axes) -> None:
+def plot_over_quota(df: pandas.DataFrame, ax: matplotlib.axes.Axes) -> bool:
     over_quota: pandas.DataFrame = df[["Anmeldename", "Datum", "Dauer"]].groupby(
         # group by participant
         "Anmeldename"
@@ -107,20 +114,30 @@ def plot_over_quota(df: pandas.DataFrame, ax: matplotlib.axes.Axes) -> None:
         # sum up working quota
         working_quota = pandas.NamedAgg(
             column = "Datum",
-            aggfunc = lambda x: x.apply(get_working_quota_from_timestamp).sum()
+            aggfunc = get_working_quota_from_series
         )
     ).query(
         "actual_work > working_quota"
     )
 
-    table: matplotlib.table.Table = pandas.plotting.table(
-        # "Anmeldename" is index
-        ax, over_quota[["actual_work", "working_quota"]],
-        colLabels = ["ist", "soll"], loc = "upper center"
-    )
+    # get difference
+    over_quota["diff"] = over_quota["actual_work"].sub(over_quota["working_quota"])
+
+    if over_quota.empty:
+        table: matplotlib.table.Table = matplotlib.table.Table(
+            ax, loc = "upper center"
+        )
+    else:
+        table: matplotlib.table.Table = pandas.plotting.table(
+            # "Anmeldename" is index
+            ax, over_quota[["actual_work", "working_quota", "diff"]],
+            colLabels = ["Ist", "Soll", "Differenz"], loc = "upper center",
+        )
     table.scale(1, 1.5)
     # show only the table
     ax.axis("off")
+
+    return not over_quota.empty
 
 
 argument_parser = argparse.ArgumentParser(description = description)
@@ -149,7 +166,9 @@ with matplotlib.backends.backend_pdf.PdfPages(args.outfile[0]) as pdf:
     pdf.savefig(figure = fig, bbox_inches = "tight")
     # second page
     fig, ax = pyplot.subplots()
-    plot_over_quota(df, ax)
-    fig.suptitle("Überstunden")
+    if plot_over_quota(df, ax):
+        fig.suptitle("Überstunden")
+    else:
+        fig.suptitle("keine Überstunden")
     pdf.savefig(figure = fig, bbox_inches = "tight")
 
