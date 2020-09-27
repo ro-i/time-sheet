@@ -39,8 +39,14 @@ working_quota: List[Tuple[float, float, float]] = [
     )
 ]
 
+# short description of this application
 description: str = (
-    "Parse a csv file and plot it. [TODO]"
+    "Parse a time-sheet csv file and plot it."
+)
+
+# which csv columns are to be read from the given input file?
+csv_columns: Tuple[str] = (
+    "Datum", "Dauer", "Anmeldename"
 )
 
 
@@ -63,7 +69,7 @@ def get_week_id_from_timestamp(ts: str) -> int:
     return "{}/{:02d}".format(year, week)
 
 
-def plot_avg_time(df: pandas.DataFrame, ax: matplotlib.axes.Axes) -> None:
+def calc_avg_time(df: pandas.DataFrame) -> pandas.DataFrame:
     # count teaching assistants, i.e. unique TUM IDs (such as "ab12cde")
     ta_count: int = df["Anmeldename"].nunique()
     if ta_count == 0:
@@ -82,17 +88,22 @@ def plot_avg_time(df: pandas.DataFrame, ax: matplotlib.axes.Axes) -> None:
         )
     )
 
-    # "Datum" should become a column again ( named "index")
+    # "Datum" should become a column again (named "index")
     avg_time.reset_index(inplace = True)
 
-    # plot
+    return avg_time
+
+
+def plot_avg_time(df: pandas.DataFrame, ax: matplotlib.axes.Axes) -> None:
+    avg_time: pandas.DataFrame = calc_avg_time(df)
+
     avg_time.plot(ax = ax, kind = "bar", x = "index", y = "avg_time",
                   color = "red", legend = False)
     ax.set_xlabel("Kalenderwoche/Jahr")
     ax.set_ylabel("Durchschnittliche Arbeitszeit pro Tutor")
 
 
-def plot_over_quota(df: pandas.DataFrame, ax: matplotlib.axes.Axes) -> bool:
+def calc_over_quota(df: pandas.DataFrame) -> pandas.DataFrame:
     over_quota: pandas.DataFrame = df[["Anmeldename", "Datum", "Dauer"]].groupby(
         # group by participant
         "Anmeldename"
@@ -117,6 +128,12 @@ def plot_over_quota(df: pandas.DataFrame, ax: matplotlib.axes.Axes) -> bool:
     over_quota = over_quota[["Ist", "Soll", "Differenz"]].round(1).\
             sort_values(by = ["Differenz"], ascending = [False])
 
+    return over_quota
+
+
+def plot_over_quota(df: pandas.DataFrame, ax: matplotlib.axes.Axes) -> bool:
+    over_quota: pandas.DataFrame = calc_over_quota(df)
+
     if over_quota.empty:
         table: matplotlib.table.Table = matplotlib.table.Table(
             ax, loc = "upper center"
@@ -133,35 +150,45 @@ def plot_over_quota(df: pandas.DataFrame, ax: matplotlib.axes.Axes) -> bool:
     return not over_quota.empty
 
 
-argument_parser = argparse.ArgumentParser(description = description)
-argument_parser.add_argument(
-    'infile', metavar = 'INFILE', nargs = 1, help = "csv file to analyze"
-)
-argument_parser.add_argument(
-    'outfile', metavar = 'OUTFILE', nargs = 1, help = "output pdf filename"
-)
-args: argparse.Namespace = argument_parser.parse_args()
+def read(infile: str) -> pandas.DataFrame:
+    # read file into a pandas DataFrame
+    with open(infile, mode = "r", encoding = "utf-8") as file:
+        df: pandas.DataFrame = pandas.read_csv(file, usecols = csv_columns)
+    return df
 
 
-# read file into a pandas DataFrame
-with open(args.infile[0], mode = "r", encoding = "utf-8") as file:
-    df: pandas.DataFrame = pandas.read_csv(file)
+def render(df: pandas.DataFrame, outfile: str) -> None:
+    # use pdf backend
+    matplotlib.use("pdf", force = True)
+
+    with matplotlib.backends.backend_pdf.PdfPages(outfile) as pdf:
+        # first page
+        fig, ax = pyplot.subplots()
+        plot_avg_time(df, ax)
+        fig.suptitle("Durschnittliche Arbeitszeit pro Woche pro Tutor")
+        pdf.savefig(figure = fig, bbox_inches = "tight")
+        # second page
+        fig, ax = pyplot.subplots()
+        if plot_over_quota(df, ax):
+            fig.suptitle("Überstunden")
+        else:
+            fig.suptitle("keine Überstunden")
+        pdf.savefig(figure = fig, bbox_inches = "tight")
 
 
-# use pdf backend
-matplotlib.use("pdf", force = True)
+def main() -> None:
+    argument_parser = argparse.ArgumentParser(description = description)
+    argument_parser.add_argument(
+        'infile', metavar = 'INFILE', nargs = 1, help = "csv file to analyze"
+    )
+    argument_parser.add_argument(
+        'outfile', metavar = 'OUTFILE', nargs = 1, help = "output pdf filename"
+    )
+    args: argparse.Namespace = argument_parser.parse_args()
 
-with matplotlib.backends.backend_pdf.PdfPages(args.outfile[0]) as pdf:
-    # first page
-    fig, ax = pyplot.subplots()
-    plot_avg_time(df, ax)
-    fig.suptitle("Durschnittliche Arbeitszeit pro Woche pro Tutor")
-    pdf.savefig(figure = fig, bbox_inches = "tight")
-    # second page
-    fig, ax = pyplot.subplots()
-    if plot_over_quota(df, ax):
-        fig.suptitle("Überstunden")
-    else:
-        fig.suptitle("keine Überstunden")
-    pdf.savefig(figure = fig, bbox_inches = "tight")
+    df: pandas.DataFrame = read(args.infile[0])
+    render(df, args.outfile[0])
 
+
+if __name__ == "__main__":
+    main()
