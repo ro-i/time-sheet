@@ -97,7 +97,7 @@ def plot_avg_time(df: pandas.DataFrame, ax: matplotlib.axes.Axes) -> None:
 
 
 def calc_over_quota(df: pandas.DataFrame) -> pandas.DataFrame:
-    over_quota: pandas.DataFrame = df[["Anmeldename", "Datum", "Dauer"]].groupby(
+    over_quota: pandas.DataFrame = df.groupby(
         # group by participant
         "Anmeldename"
     ).agg(
