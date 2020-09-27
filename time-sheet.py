@@ -48,7 +48,6 @@ def get_working_quota_tuple_from_timestamp(ts: str) -> Tuple[float, float, float
     for tuple in working_quota:
         if tuple[0] <= ts and ts <= tuple[1]:
             return tuple
-    print(ts)
     return None
 
 
