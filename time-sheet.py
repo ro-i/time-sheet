@@ -39,14 +39,14 @@ working_quota: List[Tuple[float, float, float]] = [
     )
 ]
 
-# short description of this application
-description: str = (
-    "Parse a time-sheet csv file and plot it."
-)
-
 # which csv columns are to be read from the given input file?
 csv_columns: Tuple[str] = (
     "Datum", "Dauer", "Anmeldename"
+)
+
+# short description of this application
+description: str = (
+    "Parse a time-sheet csv file and plot it."
 )
 
 
@@ -75,12 +75,9 @@ def calc_avg_time(df: pandas.DataFrame) -> pandas.DataFrame:
     if ta_count == 0:
         sys.exit("No valid entries found.")
 
-    # use date as index
-    avg_time: pandas.DataFrame = df.set_index("Datum")
-
-    avg_time = avg_time.groupby(
+    avg_time: pandas.DataFrame = df.groupby(
         # group by week
-        by = get_week_id_from_timestamp
+        by = df["Datum"].apply(get_week_id_from_timestamp)
     ).agg(
         # average working time per week per teaching assistant
         avg_time = pandas.NamedAgg(
@@ -88,17 +85,13 @@ def calc_avg_time(df: pandas.DataFrame) -> pandas.DataFrame:
         )
     )
 
-    # "Datum" should become a column again (named "index")
-    avg_time.reset_index(inplace = True)
-
     return avg_time
 
 
 def plot_avg_time(df: pandas.DataFrame, ax: matplotlib.axes.Axes) -> None:
     avg_time: pandas.DataFrame = calc_avg_time(df)
 
-    avg_time.plot(ax = ax, kind = "bar", x = "index", y = "avg_time",
-                  color = "red", legend = False)
+    avg_time.plot(ax = ax, kind = "bar", color = "red", legend = False)
     ax.set_xlabel("Kalenderwoche/Jahr")
     ax.set_ylabel("Durchschnittliche Arbeitszeit pro Tutor")
 
