@@ -23,17 +23,17 @@ from typing import List, Tuple
 working_quota: List[Tuple[float, float, float]] = [
     (
         # begin
-        datetime.datetime.fromisoformat("2020-09-01").timestamp(),
+        datetime.datetime.fromisoformat("2020-09-01 00:00:00").timestamp(),
         # end
-        datetime.datetime.fromisoformat("2021-01-31").timestamp(),
+        datetime.datetime.fromisoformat("2021-01-31 23:59:59").timestamp(),
         # total quota
         10.5 * 12
     ),
     (
         # begin
-        datetime.datetime.fromisoformat("2021-02-01").timestamp(),
+        datetime.datetime.fromisoformat("2021-02-01 00:00:00").timestamp(),
         # end
-        datetime.datetime.fromisoformat("2021-03-31").timestamp(),
+        datetime.datetime.fromisoformat("2021-03-31 23:59:59").timestamp(),
         # total quota
         3.5 * 8
     )
@@ -44,21 +44,12 @@ description: str = (
 )
 
 
-def is_timestamp_in_date_range(ts: str) -> int:
-    tuple = get_working_quota_tuple_from_timestamp(ts)
-    return True if tuple is not None else False
-
-
 def get_working_quota_tuple_from_timestamp(ts: str) -> Tuple[float, float, float]:
     for tuple in working_quota:
         if tuple[0] <= ts and ts <= tuple[1]:
             return tuple
+    print(ts)
     return None
-
-
-def get_working_quota_from_timestamp(ts: str) -> float:
-    tuple = get_working_quota_tuple_from_timestamp(ts)
-    return tuple[2] if tuple is not None else 0
 
 
 def get_working_quota_from_series(s: pandas.Series) -> float:
@@ -70,7 +61,7 @@ def get_working_quota_from_series(s: pandas.Series) -> float:
 
 def get_week_id_from_timestamp(ts: str) -> int:
     (year, week, day) = datetime.date.fromtimestamp(int(ts)).isocalendar()
-    return str(week) + "/" + str(year)
+    return "{}/{:02d}".format(year, week)
 
 
 def plot_avg_time(df: pandas.DataFrame, ax: matplotlib.axes.Axes) -> None:
@@ -108,20 +99,24 @@ def plot_over_quota(df: pandas.DataFrame, ax: matplotlib.axes.Axes) -> bool:
         "Anmeldename"
     ).agg(
         # sum up actual working hours
-        actual_work = pandas.NamedAgg(
+        Ist = pandas.NamedAgg(
             column = "Dauer", aggfunc = numpy.sum
         ),
         # sum up working quota
-        working_quota = pandas.NamedAgg(
+        Soll = pandas.NamedAgg(
             column = "Datum",
             aggfunc = get_working_quota_from_series
         )
     ).query(
-        "actual_work > working_quota"
+        "Ist > Soll"
     )
 
     # get difference
-    over_quota["diff"] = over_quota["actual_work"].sub(over_quota["working_quota"])
+    over_quota["Differenz"] = over_quota["Ist"].sub(over_quota["Soll"])
+
+    # build final dataframe
+    over_quota = over_quota[["Ist", "Soll", "Differenz"]].round(1).\
+            sort_values(by = ["Differenz"], ascending = [False])
 
     if over_quota.empty:
         table: matplotlib.table.Table = matplotlib.table.Table(
@@ -130,8 +125,7 @@ def plot_over_quota(df: pandas.DataFrame, ax: matplotlib.axes.Axes) -> bool:
     else:
         table: matplotlib.table.Table = pandas.plotting.table(
             # "Anmeldename" is index
-            ax, over_quota[["actual_work", "working_quota", "diff"]],
-            colLabels = ["Ist", "Soll", "Differenz"], loc = "upper center",
+            ax, over_quota, loc = "upper center"
         )
     table.scale(1, 1.5)
     # show only the table

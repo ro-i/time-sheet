@@ -17,9 +17,9 @@ from typing import List
 csv_header: str = "Datum,Dauer,Anmeldename\n"
 
 # begin of date range for random date generation
-dates_begin: int = int(datetime.datetime.fromisoformat("2020-09-01").timestamp())
+dates_begin: int = int(datetime.datetime.fromisoformat("2020-09-01 00:00:00").timestamp())
 # end of date range for random date generation
-dates_end: int = int(datetime.datetime.fromisoformat("2021-03-31").timestamp())
+dates_end: int = int(datetime.datetime.fromisoformat("2021-03-31 23:59:59").timestamp())
 
 # number of random samples to be generated
 sample_num: int = 2000
@@ -72,7 +72,8 @@ def generate_working_times() -> List[str]:
 
 argument_parser = argparse.ArgumentParser()
 argument_parser.add_argument(
-    'file', metavar = 'FILE', nargs = 1, help = "name of csv file to be generated"
+    'file', metavar = 'FILE', nargs = 1,
+    help = "name of csv file to be generated (file must not exist)"
 )
 args: argparse.Namespace = argument_parser.parse_args()
 
