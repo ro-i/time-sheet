@@ -17,6 +17,7 @@ most relevant ones:
 - `Dauer`: the working time
 - `Anmeldename`: the tum id of the corresponding teaching assistant
                  (collected by Moodle, thus failsafe)
+
 The presence of those columns is required for this script to work. The column
 names will get configurable in the future.
 
@@ -25,7 +26,7 @@ names will get configurable in the future.
 usage
 -----
 
-Simply run `timesheet/timesheet.py infile.csv outfile.pdf` where
+Run `timesheet/timesheet.py infile.csv outfile.pdf` where
 - `timesheet/timesheet.py` is the script (run `make` or `make install` if you
   want to install the script, so that you only have to use `timesheet`).
 - `infile.csv` is the file with the data to parse.
