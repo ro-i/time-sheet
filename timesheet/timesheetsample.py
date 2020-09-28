@@ -70,13 +70,21 @@ def generate_working_times() -> List[str]:
     ]
 
 
-argument_parser = argparse.ArgumentParser()
-argument_parser.add_argument(
-    'file', metavar = 'FILE', nargs = 1,
-    help = "name of csv file to be generated (file must not exist)"
-)
-args: argparse.Namespace = argument_parser.parse_args()
+def run(file: str) -> None:
+    content: str = file_build()
+    file_write(file, content)
 
 
-content: str = file_build()
-file_write(args.file[0], content)
+def main() -> None:
+    argument_parser = argparse.ArgumentParser()
+    argument_parser.add_argument(
+        'file', metavar = 'FILE', nargs = 1,
+        help = "name of csv file to be generated (file must not exist)"
+    )
+    args: argparse.Namespace = argument_parser.parse_args()
+
+    run(args.file[0])
+
+
+if __name__ == "__main__":
+    main()

@@ -169,6 +169,11 @@ def render(df: pandas.DataFrame, outfile: str) -> None:
         pdf.savefig(figure = fig, bbox_inches = "tight")
 
 
+def run(infile: str, outfile: str) -> None:
+    df: pandas.DataFrame = read(infile)
+    render(df, outfile)
+
+
 def main() -> None:
     argument_parser = argparse.ArgumentParser(description = description)
     argument_parser.add_argument(
@@ -179,8 +184,7 @@ def main() -> None:
     )
     args: argparse.Namespace = argument_parser.parse_args()
 
-    df: pandas.DataFrame = read(args.infile[0])
-    render(df, args.outfile[0])
+    run(args.infile[0], args.outfile[0])
 
 
 if __name__ == "__main__":
