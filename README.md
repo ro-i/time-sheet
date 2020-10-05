@@ -32,6 +32,11 @@ Run `timesheet/timesheet.py infile.csv outfile.pdf` where
 - `infile.csv` is the file with the data to parse.
 - `outfile.pdf` is the output pdf to be generated.
 
+You may perform a sample run:
+1) `make install`
+2) `make samplefile`
+3) `timesheet samplefile.csv test.pdf`
+
 test
 ----
 
