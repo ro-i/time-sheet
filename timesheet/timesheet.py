@@ -12,7 +12,7 @@ import typing
 import sys
 
 from matplotlib import pyplot
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 
 # important docs:
@@ -40,7 +40,7 @@ working_quota: List[Tuple[float, float, float]] = [
 ]
 
 # which csv columns are to be read from the given input file?
-csv_columns: Tuple[str] = (
+csv_columns: Tuple[str, str, str] = (
     "Datum", "Dauer", "Anmeldename"
 )
 
@@ -50,10 +50,15 @@ description: str = (
 )
 
 
-def get_working_quota_tuple_from_timestamp(ts: str) -> Tuple[float, float, float]:
+def get_working_quota_tuple_from_timestamp(
+    ts: str
+) -> Optional[Tuple[float, float, float]]:
+    ts_float: float = float(ts)
+
     for tuple in working_quota:
-        if tuple[0] <= ts and ts <= tuple[1]:
+        if tuple[0] <= ts_float and ts_float <= tuple[1]:
             return tuple
+
     return None
 
 
@@ -64,7 +69,7 @@ def get_working_quota_from_series(s: pandas.Series) -> float:
             .sum()
 
 
-def get_week_id_from_timestamp(ts: str) -> int:
+def get_week_id_from_timestamp(ts: str) -> str:
     (year, week, day) = datetime.date.fromtimestamp(int(ts)).isocalendar()
     return "{}/{:02d}".format(year, week)
 
@@ -126,16 +131,13 @@ def calc_over_quota(df: pandas.DataFrame) -> pandas.DataFrame:
 
 def plot_over_quota(df: pandas.DataFrame, ax: matplotlib.axes.Axes) -> bool:
     over_quota: pandas.DataFrame = calc_over_quota(df)
+    table: matplotlib.table.Table
 
     if over_quota.empty:
-        table: matplotlib.table.Table = matplotlib.table.Table(
-            ax, loc = "upper center"
-        )
+        table = matplotlib.table.Table(ax, loc = "upper center")
     else:
-        table: matplotlib.table.Table = pandas.plotting.table(
-            # "Anmeldename" is index
-            ax, over_quota, loc = "upper center"
-        )
+        # "Anmeldename" is index
+        table = pandas.plotting.table(ax, over_quota, loc = "upper center")
     table.scale(1, 1.5)
     # show only the table
     ax.axis("off")

@@ -10,7 +10,7 @@ from timesheet import timesheetsample as tss
 
 
 class TimeSheetTest(unittest.TestCase):
-    def test_dummy(self):
+    def test_dummy(self) -> None:
         self.assertTrue(True)
 
 
