@@ -33,14 +33,14 @@ Run `timesheet/timesheet.py timesheet timesheet.conf infile.csv outfile.pdf`,
 where
 - `timesheet/timesheet.py` is the script (run `make` or `make install` if you
   want to install the script, so that you only have to use `timesheet`).
-- `timesheet.con` is the configuration file.
+- `timesheet.conf` is the configuration file.
 - `infile.csv` is the file with the data to parse.
 - `outfile.pdf` is the output pdf to be generated.
 
 You may perform a sample run:
 1) `make install`
 2) `make samplefile`
-3) `timesheet samplefile.csv test.pdf`
+3) `timesheet/timesheet.py timesheet timesheet.conf samplefile.csv test.pdf`
 
 
 test
