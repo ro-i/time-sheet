@@ -3,6 +3,8 @@
 
 # or /usr/local
 prefix_dir = $(HOME)/.local
+config_file = timesheet.conf
+sample_file = samplefile.csv
 
 # default target
 .PHONY: install
@@ -11,17 +13,17 @@ install:
 
 .PHONY: clean
 clean:
-	rm -f ./timesheet.py ./samplefile.csv
+	rm -f ./timesheet.py ./'$(samplefile)'
 
 .PHONY: samplefile
 samplefile:
-	python3 ./timesheet/timesheetsample.py samplefile.csv
+	python3 ./timesheet/timesheet.py sample '$(config_file)' '$(sample_file)'
 
 .PHONY: uninstall
 uninstall:
 	rm -f '$(prefix_dir)/bin/timesheet'
 
-# do not throw a Makefile error on test failures
 .PHONY: test
-test:
-	@python3 -m unittest --quiet || true
+test: samplefile
+	bash ./tests/test.sh '$(config_file)' '$(sample_file)'
+
