@@ -18,12 +18,12 @@ python3 "${old_pwd}/timesheet/timesheet.py" dump "${old_pwd}/$config_file" \
 # resulting dumps will be named 'val_avg_time_[...]' and 'val_over_quota[...]'
 gawk -f "${old_pwd}/tests/validate.awk" "${old_pwd}/$sample_file"
 
-if ! diff -q avg_time* val_avg_time* > /dev/null; then
+if ! diff --color=auto -d avg_time* val_avg_time*; then
 	printf '%s\n' "avg_time test failed"
 	fail=1
 fi
 
-if ! diff -q over_quota* val_over_quota* > /dev/null; then
+if ! diff --color=auto  -d over_quota* val_over_quota*; then
 	printf '%s\n' "over_quota test failed"
 	fail=1
 fi
