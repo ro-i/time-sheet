@@ -92,7 +92,7 @@ class Plot:
         fig, ax = pyplot.subplots()
 
         ax.bar(x = avg_time.index, height = avg_time['avg_time'], color = 'red')
-        fig.autofmt_xdate()
+        fig.autofmt_xdate(rotation = 90)
 
         ax.set_xlabel(self.avg_time_xlabel)
         ax.set_ylabel(self.avg_time_ylabel)
