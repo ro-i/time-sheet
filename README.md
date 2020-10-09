@@ -82,7 +82,7 @@ compares the results.
 **Caution**: Because of different floating point handling, the tests may
 produce false negatives. The data dumps may differ by a slightly different
 sort order (e.g. sort two entries with the same floating point sort key) or a
-differently rounded value (e.g. 5.0 vs 4.9)
+differently rounded value (e.g. 5.0 vs 4.9).
 Therefore the `diff` output is displayed.
 
 
