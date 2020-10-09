@@ -1,8 +1,9 @@
 timesheet
 =========
 
-A script to generate statistics from the working hours of teaching assistants
-at the Technical University of Munich.
+Initially, this script has been written to generate statistics from the working
+hours of teaching assistants at the Technical University of Munich. Meanwhile,
+it may also be used for other purposes.
 
 The data may be collected by the database activity in
 [Moodle](https://www.moodle.tum.de/) and exported to a
@@ -78,6 +79,12 @@ The test dumps the calculated pandas.DataFrame objects to csv files (using the
 `dump` command of the script, calculate the same data with AWK and then
 compares the results.
 
+**Caution**: Because of different floating point handling, the tests may
+produce false negatives. The data dumps may differ by a slightly different
+sort order (e.g. sort two entries with the same floating point sort key) or a
+differently rounded value (e.g. 5.0 vs 4.9)
+Therefore the `diff` output is displayed.
+
 
 see also
 --------
@@ -88,5 +95,7 @@ Important documentation:
 
 bugs/todo
 ---------
-I am not yet sure what happens if your computer uses a timezone different from
-Europe/Berlin.
+- I am not yet sure what happens if your computer uses a timezone different from
+  Europe/Berlin.
+- If the contract spans more than 10 months, the x-axis labels of the bar
+  diagram begin to overlap.
