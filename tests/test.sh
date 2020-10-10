@@ -15,20 +15,22 @@ cd "$tmpdir"
 python3 "${old_pwd}/timesheet/timesheet.py" dump "${old_pwd}/$config_file" \
 	"${old_pwd}/$sample_file"
 
+# remove csv headers
+sed -i '1d' avg_time* over_quota*
+
 # resulting dumps will be named 'val_avg_time_[...]' and 'val_over_quota[...]'
-gawk -f "${old_pwd}/tests/validate.awk" "${old_pwd}/$sample_file"
+gawk -f "${old_pwd}/tests/validate.awk" "${old_pwd}/$config_file" \
+	"${old_pwd}/$sample_file"
 
 if ! diff --color=auto -d avg_time* val_avg_time*; then
-	printf '%s\n' "avg_time test failed"
-	fail=1
+	diff=1
 fi
 
 if ! diff --color=auto  -d over_quota* val_over_quota*; then
-	printf '%s\n' "over_quota test failed"
-	fail=1
+	diff=1
 fi
 
-if [[ ! $fail ]]; then
+if [[ ! $diff ]]; then
 	printf '%s\n' "Test passed."
 fi
 
