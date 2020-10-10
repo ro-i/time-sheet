@@ -97,6 +97,7 @@ class Plot:
         ax.set_xlabel(self.avg_time_xlabel)
         ax.set_ylabel(self.avg_time_ylabel)
         ax.autoscale(tight=True)
+        ax.get_xaxis().set_major_locator(matplotlib.ticker.MaxNLocator(30))
 
         fig.suptitle(self.avg_time_title)
 

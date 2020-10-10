@@ -97,5 +97,3 @@ bugs/todo
 ---------
 - I am not yet sure what happens if your computer uses a timezone different from
   that used to create the csv time sheet.
-- If the contract spans more than 10 months, the x-axis labels of the bar
-  diagram begin to overlap.
