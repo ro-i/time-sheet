@@ -76,7 +76,7 @@ It is no longer based on python unit tests, but on a simple reference
 implementation using GNU AWK. (Hopefully too simple to be wrong... :-) )
 
 The test dumps the calculated pandas.DataFrame objects to csv files (using the
-`dump` command of the script, calculate the same data with AWK and then
+`dump` command of the script, calculates the same data with AWK, and then
 compares the results.
 
 **Caution**: Because of different floating point handling, the tests may
