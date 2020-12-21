@@ -52,7 +52,7 @@ ENDFILE {
 }
 
 
-# process config file (= fist file)
+# process config file (= first file)
 NR == FNR {
 	# detect start of contract section
 	if ($0 ~ /^\[Contract\]$/) {
