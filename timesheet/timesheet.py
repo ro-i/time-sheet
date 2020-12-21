@@ -96,8 +96,8 @@ class Plot:
 
         ax.set_xlabel(self.avg_time_xlabel)
         ax.set_ylabel(self.avg_time_ylabel)
-        ax.autoscale(tight=True)
-        ax.get_xaxis().set_major_locator(matplotlib.ticker.MaxNLocator(30))
+        ax.autoscale(tight = True)
+        ax.get_xaxis().set_major_locator(pyplot.MaxNLocator(30 if avg_time.size > 30 else avg_time.size))
 
         fig.suptitle(self.avg_time_title)
 
@@ -169,8 +169,6 @@ class Sample:
 
         # get numpy random generator
         self.rng: numpy.random.Generator = numpy.random.default_rng()
-        # construct pandas dataframe
-        self.df: pandas.DataFrame = self.generate()
 
     def generate(self) -> pandas.DataFrame:
         return pandas.DataFrame(data = {
@@ -472,7 +470,7 @@ def sample(
         **config['Sample']
     )
 
-    sample.df.to_csv(outfile, mode = 'w')
+    sample.generate().to_csv(outfile, mode = 'w')
 
 
 def timesheet(
