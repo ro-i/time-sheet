@@ -74,6 +74,8 @@ test
 Run `make test` to run a small and (currently) very simple test.
 It is no longer based on python unit tests, but on a simple reference
 implementation using GNU AWK. (Hopefully too simple to be wrong... :-) )
+The positions of the relevant csv columns are hardcoded in this script, so
+if you want to use it beyond `make test`, you have to adapt it.
 
 The test dumps the calculated pandas.DataFrame objects to csv files (using the
 `dump` command of the script, calculates the same data with AWK, and then
